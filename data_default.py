@@ -1,0 +1,39 @@
+DEFAULT_USER = {
+    "level": 1,
+    "health": 100,
+    "maxhealth": 100,
+    "sanity": 100,
+    "maxsanity": 100,
+    "attributes": {
+        "CON": 0,
+        "FOR": 0,
+        "INT": 0,
+        "DEX": 0,
+        "PRE": 0,
+        "CAR": 0
+    },
+    "buffs": [],
+    "debuffs": [],
+    "modifiers": [],
+    "boost": 0,
+
+
+    # INVENTORY
+    "cash": 50,
+    "inventory_space": 20,
+
+    "armory": {
+        "weapon": "Nenhum",
+        "secondary": "Nenhum",
+        "armor": {
+            "head": "Nenhum",
+            "chest": "Nenhum",
+            "boots": "Nenhum",
+            "hands": "Nenhum"
+        }
+    },
+
+    "equipments": [],
+
+    "items": {}
+}
