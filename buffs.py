@@ -62,7 +62,7 @@ BUFFS = {
         "name": "Inabalável",
         "emoji": "🧠",
         "effects": {
-            "SAN": 5
+            "SAN": -5
         }
     },
     "trauma": {

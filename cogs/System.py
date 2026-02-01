@@ -70,6 +70,40 @@ class System(commands.Cog):
 
         embed.set_footer(text="Potential Roller 🫃 – Todos os Direitos Reservados (Provavelmente)")
 
+        @commands.command(name="embed", aliases=["createembed", "newembed"])
+        @commands.has_permissions(manage_guild=True)
+        async def embed(self, ctx, color: str, title: str, *, content: str):
+            try:
+                color = discord.Color(int(color.replace("#", ""), 16))
+            except ValueError:
+                await ctx.send("❌ Invalid color. Use hex like `#ff0000`.")
+                return
+
+            lines = content.splitlines()
+            description = []
+            fields = []
+
+            for line in lines:
+                if line.lower().startswith("field:"):
+                    try:
+                        name, value = line[6:].split("|", 1)
+                        fields.append((name.strip(), value.strip()))
+                    except ValueError:
+                        continue
+                else:
+                    description.append(line)
+
+            embed = discord.Embed(
+                title=title,
+                description="\n".join(description),
+                color=color
+            )
+
+            for name, value in fields:
+                embed.add_field(name=name, value=value, inline=False)
+
+            await ctx.send(embed=embed)
+
         await ctx.send(embed=embed)
 
 async def setup(bot):

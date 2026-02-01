@@ -152,7 +152,25 @@ class rollManager(commands.Cog):
         # =========================
         # Output
         # =========================
-        result = "✅ **SUCESSO**" if success else "❌ **FALHA**"
+
+        # =========================
+        # Critical check (FINAL TOTAL)
+        # =========================
+        critical = None
+
+        if total <= 1:
+            critical = "failure"
+        elif total >= 20:
+            critical = "success"
+
+        if critical == "success":
+            result = "🌟 **SUCESSO CRÍTICO!**"
+            color = discord.Color.gold()
+        elif critical == "failure":
+            result = "💀 **FALHA CRÍTICA!**"
+            color = discord.Color.dark_red()
+        else:
+            result = "✅ **SUCESSO**" if success else "❌ **FALHA**"
 
         breakdown_text = (
             "```diff\n" + "\n".join(breakdown) + "\n```"
@@ -193,8 +211,6 @@ class rollManager(commands.Cog):
         embed.set_footer(text=f"Rolagem de {ctx.author.display_name}")
 
         await ctx.send(embed=embed)
-
-        await ctx.send(msg)
 
     @commands.Cog.listener()
     async def on_message(self, message):
