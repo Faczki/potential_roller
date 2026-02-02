@@ -1,59 +1,114 @@
-import discord
 from discord.ext import commands
-import logging
-from dotenv import load_dotenv
-import os
-import json
+import discord
 
-load_dotenv()
-token = os.getenv("DISCORD_TOKEN")
+class System(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-handler = logging.FileHandler(filename='discordbot.log', encoding='utf-8', mode='w')
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
+    # =========================
+    # HELP COMMAND
+    # =========================
+    @commands.command(name="help", aliases=["h", "ajuda", "socorro", "support"])
+    async def help(self, ctx):
+        embed = discord.Embed(
+            title="📖 Ajuda",
+            color=discord.Color.blurple()
+        )
 
-bot = commands.Bot(command_prefix = '.', intents = intents, case_insensitive = True, help_command = None)
-bot.user_data = {}
+        embed.add_field(
+            name="🎲 Rolls",
+            value=(
+                "`.roll [atributo] [perícia]` – Rolagem padrão\n"
+                "`.d20`, `.2d10`, `.d6` – Rolagens de dado"
+            ),
+            inline=False
+        )
 
-def load_data():
-    try:
-        with open("data.json", "r") as file:
-            content = file.read().strip()
-            if not content:
-                bot.user_data = {}
+        embed.add_field(
+            name="📊 Stats",
+            value=(
+                "`.stats` – Mostra seu perfil\n"
+                "`.inventory` – Mostra seu inventário\n"
+                "`.help` – Mostra essa mensagem"
+            ),
+            inline=False
+        )
+
+        if ctx.author.guild_permissions.manage_guild:
+            embed.add_field(
+                name="🧪 Buffs e Debuffs",
+                value=(
+                    "`.addbuff`, `.removebuff`\n"
+                    "`.adddebuff`, `.removedebuff`\n"
+                    "`.clearbuffs`, `.cleardebuffs`"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="✨ Atributos",
+                value=(
+                    "`.addmodifier`, `.removemodifier`\n"
+                    "`.changehealth`, `.changemaxhealth`\n"
+                    "`.changesanity`, `.changemaxsanity`\n"
+                    "`.setattribute`, `.boost`\n"
+                    "`.changelevel`, `.erasedata`"
+                ),
+                inline=False
+            )
+
+            embed.add_field(
+                name="🎒 Inventário",
+                value=(
+                    "`.addequipment`, `.removeequipment`\n"
+                    "`.additem`, `.removeitem`\n"
+                    "`.changecash`, `.changeweapon`\n"
+                    "`.changesecondary`, `.setinvspace`\n"
+                    "`.addarmor`, `.removearmor`"
+                ),
+                inline=False
+            )
+
+        embed.set_footer(text="Potential Roller 🫃 – Todos os Direitos Reservados (Provavelmente)")
+        await ctx.send(embed=embed)
+
+    # =========================
+    # EMBED COMMAND
+    # =========================
+    @commands.command(name="embed", aliases=["createembed", "newembed"])
+    @commands.has_permissions(manage_guild=True)
+    async def embed(self, ctx, color: str, title: str, *, content: str):
+        try:
+            color = discord.Color(int(color.replace("#", ""), 16))
+        except ValueError:
+            await ctx.send("❌ Invalid color. Use hex like `#ff0000`.")
+            return
+
+        lines = content.splitlines()
+        description = []
+        fields = []
+
+        for line in lines:
+            if line.lower().startswith("field:"):
+                try:
+                    name, value = line[6:].split("|", 1)
+                    fields.append((name.strip(), value.strip()))
+                except ValueError:
+                    continue
             else:
-                bot.user_data = json.loads(content)
-    except (FileNotFoundError, json.JSONDecodeError):
-        bot.user_data = {}
+                description.append(line)
 
-def save_data():
-    with open("data.json", "w") as file:
-        json.dump(bot.user_data, file, indent=4)
+        embed = discord.Embed(
+            title=title,
+            description="\n".join(description),
+            color=color
+        )
 
-bot.save_data = save_data
+        for name, value in fields:
+            embed.add_field(name=name, value=value, inline=False)
 
-@bot.event
-async def on_ready():
-    try:
-        load_data()
-        await bot.load_extension("cogs.stats")
-        await bot.load_extension("cogs.addBuff")
-        await bot.load_extension("cogs.attributesHandler")
-        await bot.load_extension("cogs.inventory_manager")
-        await bot.load_extension("cogs.rollManager")
-        await bot.load_extension("cogs.System")
-        print("Bot online!")
-    except Exception as e:
-        print("ERROR IN on_ready:", e)
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    await bot.process_commands(message)
+        await ctx.send(embed=embed)
 
 
-load_data()
-bot.run(token, log_handler = handler, log_level = logging.DEBUG)
+async def setup(bot):
+    await bot.add_cog(System(bot))
