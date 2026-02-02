@@ -164,12 +164,13 @@ class rollManager(commands.Cog):
             critical = "success"
 
         if critical == "success":
-            result = "🌟 **SUCESSO CRÍTICO!**"
+            result = "🌟 **MÁXIMO NATURAL!**"
             color = discord.Color.gold()
         elif critical == "failure":
             result = "💀 **FALHA CRÍTICA!**"
             color = discord.Color.dark_red()
         else:
+            color = discord.Color.green() if success else discord.Color.red()
             result = "✅ **SUCESSO**" if success else "❌ **FALHA**"
 
         breakdown_text = (
@@ -179,7 +180,7 @@ class rollManager(commands.Cog):
 
         embed = discord.Embed(
             title=result,
-            color=discord.Color.green() if success else discord.Color.red()
+            color=color
         )
 
         embed.add_field(
