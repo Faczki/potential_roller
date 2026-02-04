@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 import json
 
+DATA_PATH = "/data/data.json" if os.getenv("RAILWAY_ENVIRONMENT") else "data.json"
+
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 
@@ -18,17 +20,19 @@ bot.user_data = {}
 
 def load_data():
     try:
-        with open("data.json", "r") as file:
+        with open(DATA_PATH, "r") as file:
             content = file.read().strip()
-            if not content:
-                bot.user_data = {}
-            else:
-                bot.user_data = json.loads(content)
-    except (FileNotFoundError, json.JSONDecodeError):
+            bot.user_data = json.loads(content) if content else {}
+    except FileNotFoundError:
+        bot.user_data = {}
+    except json.JSONDecodeError:
+        print("⚠️ data.json is corrupted. Starting with empty data.")
         bot.user_data = {}
 
 def save_data():
-    with open("data.json", "w") as file:
+    os.makedirs("/data", exist_ok=True)
+
+    with open(DATA_PATH, "w") as file:
         json.dump(bot.user_data, file, indent=4)
 
 bot.save_data = save_data
@@ -43,6 +47,7 @@ async def on_ready():
         await bot.load_extension("cogs.inventory_manager")
         await bot.load_extension("cogs.rollManager")
         await bot.load_extension("cogs.System")
+        print("DATA FILE EXISTS:", os.path.exists("/data/data.json"))
         print("Bot online!")
     except Exception as e:
         print("ERROR IN on_ready:", e)
